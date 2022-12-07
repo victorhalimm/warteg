@@ -14,18 +14,19 @@ struct dish {
 dish* dishHead = NULL;
 dish* dishTail = NULL;
 
-dish* createDish(dish toBeAdded) {
+dish* createDish(dish* toBeAdded) {
     dish* newDish = (dish *) malloc(sizeof(dish));
-    strcpy(newDish->dishName, toBeAdded.dishName);
-    newDish->dishPrice = toBeAdded.dishPrice;
-    newDish->quantity = toBeAdded.quantity;
+    strcpy(newDish->dishName, toBeAdded->dishName);
+    newDish->dishPrice = toBeAdded->dishPrice;
+    newDish->quantity = toBeAdded->quantity;
     newDish->next = NULL;
     newDish->prev = NULL;
     return newDish;
 }
 
-void pushHead(dish toBeAdded) {
+void pushHead(dish* toBeAdded) {
     dish* newDish = createDish(toBeAdded);
+    printf("%s\n", newDish->dishName);
     if (dishHead == NULL) {
         dishHead = dishTail = newDish;
     }
@@ -36,7 +37,7 @@ void pushHead(dish toBeAdded) {
     }
 }
 
-void pushTail(dish toBeAdded) {
+void pushTail(dish* toBeAdded) {
     dish* newDish = createDish(toBeAdded);
     if (dishHead == NULL) {
         dishHead = dishTail = newDish;
@@ -52,8 +53,9 @@ void pushTail(dish toBeAdded) {
 int selector;
 void menu();
 void addDish();
+void removeDish();
 int checkLower(char dishName[]);
-void load(dish load, char dishName[], int dishPrice, int quantity);
+void load(dish* load, char dishName[], int dishPrice, int quantity);
 
 int main() {
     menu();
@@ -84,9 +86,13 @@ void menu() {
     if (selector == 1) {
         addDish();
     }
+    else if (selector == 2) {
+        removeDish();
+    }
 }
 
 void addDish() {
+    system("cls");
     char dishName[100];
     do
     {
@@ -105,11 +111,12 @@ void addDish() {
         printf("Insert the quantity of the dish [1..999]: ");
         scanf("%d", &quantity);
     } while (quantity < 1 || quantity > 999);
-    dish temp;
+    dish* temp = (dish *) malloc(sizeof(dish));
     load(temp, dishName, dishPrice, quantity);
     pushHead(temp);
+    free(temp);
     puts("The dish has been added!");
-    printf("\nPress eenter to continue...");
+    printf("\nPress enter to continue...");
     getch();
     menu();
 }
@@ -123,8 +130,22 @@ int checkLower(char dishName[]) {
     return 1;
 }
 
-void load(dish load, char dishName[], int dishPrice, int quantity) {
-    strcpy(load.dishName, dishName);
-    load.dishPrice = dishPrice;
-    load.quantity = quantity;
+void printDishTable() {
+    dish* curr = dishHead;
+    int counter = 1;
+    while (curr) {
+        printf("%-5d.%-25s%-10dRp%d\n", counter, curr->dishName, curr->quantity, curr->dishPrice);
+        counter++;
+        curr = curr->next;
+    }
+}
+
+void removeDish() {
+    printDishTable();
+}
+
+void load(dish* load, char dishName[], int dishPrice, int quantity) {
+    strcpy(load->dishName, dishName);
+    load->dishPrice = dishPrice;
+    load->quantity = quantity;
 }
