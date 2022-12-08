@@ -49,6 +49,68 @@ void pushTail(dish* toBeAdded) {
     }
 }
 
+void popHead() {
+    if (dishHead == NULL) {
+        return;
+    }
+    else if (dishHead == dishTail) {
+        dishHead = dishTail = NULL;
+    }
+    else {
+        dish* temp = dishHead;
+        temp->next->prev = NULL;
+        dishHead = temp->next;
+        temp->next = NULL;
+        free(temp);
+    }
+}
+
+void popTail() {
+    if (dishHead == NULL) {
+        return;
+    }
+    else if (dishHead == dishTail) {
+        dishHead = dishTail = NULL;
+    }
+    else {
+        dish* temp = dishTail;
+        temp->prev->next = NULL;
+        dishTail = temp->prev;
+        temp->prev = NULL;
+        free(temp);
+    }
+}
+
+void popMid(char dishName[]) {
+    if (dishHead == NULL) {
+        return;
+    }
+    else if (dishHead == dishTail) {
+        dishHead = dishTail = NULL;
+    }
+    else {
+        if (strcmp(dishHead->dishName, dishName) == 0) {
+            popHead();
+        }
+        else if (strcmp(dishTail->dishName, dishName) == 0) {
+            popTail();
+        }
+        else {
+            dish* curr = dishHead;
+            while (curr) {
+                if (strcmp(curr->dishName, dishName) == 0) {
+                    puts("found");
+                    curr->prev->next = curr->next;
+                    curr->next->prev = curr->prev;
+                    free(curr);
+                    return;
+                }
+                curr = curr->next;
+            }
+        }
+    }
+}
+
 
 int selector;
 void menu();
@@ -56,6 +118,7 @@ void addDish();
 void removeDish();
 int checkLower(char dishName[]);
 void load(dish* load, char dishName[], int dishPrice, int quantity);
+int checkDish(char dishName[]);
 
 int main() {
     menu();
@@ -113,7 +176,7 @@ void addDish() {
     } while (quantity < 1 || quantity > 999);
     dish* temp = (dish *) malloc(sizeof(dish));
     load(temp, dishName, dishPrice, quantity);
-    pushHead(temp);
+    pushTail(temp);
     free(temp);
     puts("The dish has been added!");
     printf("\nPress enter to continue...");
@@ -131,21 +194,54 @@ int checkLower(char dishName[]) {
 }
 
 void printDishTable() {
+    puts("Bude's Menu");
+    printf("\n");
     dish* curr = dishHead;
     int counter = 1;
+    printf("%-3s%-20s%-10s%s\n", "No", "Name", "Quantity", "Price");
     while (curr) {
-        printf("%-5d.%-25s%-10dRp%d\n", counter, curr->dishName, curr->quantity, curr->dishPrice);
+        printf("%-3d%-20s%-10dRp%d\n", counter, curr->dishName, curr->quantity, curr->dishPrice);
         counter++;
         curr = curr->next;
     }
+    printf("\n");
 }
 
 void removeDish() {
     printDishTable();
+    char dishName[100];
+    printf("Insert dish's name to be deleted: ");
+    scanf("%[^\n]", dishName); getchar();
+    if (checkDish(dishName) == 1) {
+        popMid(dishName);
+        printf("\nThe dish has been removed!\n");
+        printf("\nPress enter to continue");
+        getch();
+        menu();
+    }
+    else {
+        puts("There is no such dish with that name");
+        printf("\nPress enter to continue");
+        getch();
+        menu();
+    }
+
 }
 
 void load(dish* load, char dishName[], int dishPrice, int quantity) {
     strcpy(load->dishName, dishName);
     load->dishPrice = dishPrice;
     load->quantity = quantity;
+}
+
+int checkDish(char dishName[]) {
+    dish* curr = dishHead;
+    while (curr) {
+        if (strcmp(curr->dishName, dishName) == 0) {
+            puts("check");
+            return 1;
+        }
+        curr = curr->next;
+    }
+    return 0;
 }
