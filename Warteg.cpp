@@ -167,6 +167,17 @@ int lookupName(char *name) {
     return 0;
 }
 
+void printHashTable() {
+    puts("Customer's List");
+    for (int i = 0;i<9999;i++) {
+        if (customerHead[i]) {
+            for (customer* curr = customerHead[i];curr;curr=curr->next) {
+                printf("%d. %s\n", i, curr->customerName);
+            }
+        }
+    }
+}
+
 
 int selector;
 void menu();
@@ -178,6 +189,8 @@ int checkDish(char dishName[]);
 int checkName(char customerName[]);
 void addCustomer();
 void searchCustomer();
+void viewWarteg();
+void order();
 
 int main() {
     menu();
@@ -216,6 +229,9 @@ void menu() {
     }
     else if(selector == 4) {
         searchCustomer();
+    }
+    else if (selector == 5) {
+        viewWarteg();
     }
 }
 
@@ -291,7 +307,6 @@ void removeDish() {
         getch();
         menu();
     }
-
 }
 
 void addCustomer() {
@@ -326,6 +341,27 @@ void searchCustomer() {
     printf("\nPress enter to continue");
     getchar();
     menu(); 
+}
+
+void viewWarteg() {
+    printHashTable();
+    printf("\nPress enter to continue");
+    getch();
+    menu();
+}
+
+void order() {
+    system("cls");
+    char customerName[100];
+    printf("Insert the customer's name: ");
+    scanf("%[^\n]", customerName); getchar();
+    if (lookupName(customerName) == 1) {
+
+    }
+    else {
+        printf("%s is not present\n", customerName);
+    }
+    
 }
 
 int checkName(char customerName[]) {
