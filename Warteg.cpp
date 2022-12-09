@@ -99,9 +99,9 @@ void popMid(char dishName[]) {
             dish* curr = dishHead;
             while (curr) {
                 if (strcmp(curr->dishName, dishName) == 0) {
-                    puts("found");
                     curr->prev->next = curr->next;
                     curr->next->prev = curr->prev;
+                    curr->next = curr->prev = NULL;
                     free(curr);
                     return;
                 }
@@ -109,6 +109,62 @@ void popMid(char dishName[]) {
             }
         }
     }
+}
+
+unsigned long 
+    hash(char *str)
+    {
+        unsigned long hash = 5381;
+        int c;
+
+        while (c = *str++)
+            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+        return hash % 9999;
+    }
+
+struct customer {
+    char customerName[100];
+    char* food[100] = {0};
+    customer* next;
+    int totalPrice;
+} *customerHead[9999] = {NULL}, *customerTail[9999] = {NULL};
+
+customer* createCustomer(char customerName[]) {
+    customer* newCustomer = (customer *) malloc(sizeof(customer));
+    strcpy(newCustomer->customerName, customerName);
+    newCustomer->next = NULL;
+    newCustomer->totalPrice = 0;
+    return newCustomer;
+}
+
+void insertTable(char *customerName) {
+    customer* newCustomer = createCustomer(customerName);
+    int index = hash(customerName);
+    if (customerHead[index]) {
+        customerTail[index]->next = newCustomer;
+        customerTail[index] = newCustomer;
+    }
+    else {
+        customerHead[index] = customerTail[index] = newCustomer;
+    }
+}
+
+int lookupName(char *name) {
+    int index = hash(name);
+    if (customerHead[index]) {
+        if (strcmp(customerHead[index]->customerName, name) == 0) {
+            return 1;
+        }
+        else {
+            for (customer* curr = customerHead[index]; curr; curr = curr->next) {
+                if (strcmp(curr->customerName, name) == 0) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 
@@ -119,6 +175,9 @@ void removeDish();
 int checkLower(char dishName[]);
 void load(dish* load, char dishName[], int dishPrice, int quantity);
 int checkDish(char dishName[]);
+int checkName(char customerName[]);
+void addCustomer();
+void searchCustomer();
 
 int main() {
     menu();
@@ -151,6 +210,12 @@ void menu() {
     }
     else if (selector == 2) {
         removeDish();
+    }
+    else if (selector == 3) {
+        addCustomer();
+    }
+    else if(selector == 4) {
+        searchCustomer();
     }
 }
 
@@ -208,6 +273,7 @@ void printDishTable() {
 }
 
 void removeDish() {
+    system("cls");
     printDishTable();
     char dishName[100];
     printf("Insert dish's name to be deleted: ");
@@ -226,6 +292,50 @@ void removeDish() {
         menu();
     }
 
+}
+
+void addCustomer() {
+    system("cls");
+    char customerName[100];
+    do
+    {
+        printf("Insert the customer's name [Without space]: ");
+        scanf("%[^\n]", customerName); getchar();
+    } while (checkName(customerName) == 0);
+    insertTable(customerName);
+    printf("\n\nCustomer has been added!\n");
+    printf("\nPress enter to continue");
+    getch();
+    menu();
+}
+
+void searchCustomer() {
+    char customerName[100];
+    system("cls");
+    do
+    {
+        printf("Insert the customer's name to be searched: ");
+        scanf("%[^\n]", customerName); getchar();
+    } while (checkName(customerName) == 0);
+    if (lookupName(customerName) == 1) {
+        printf("%s is present\n", customerName);
+    }
+    else {
+        printf("%s is not present\n", customerName);
+    }
+    printf("\nPress enter to continue");
+    getchar();
+    menu(); 
+}
+
+int checkName(char customerName[]) {
+    int length = strlen(customerName);
+    for (int i = 0;i<length;i++) {
+        if (customerName[i] == ' ' && (customerName[i] >= '0' && customerName[i] <= '9')) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 void load(dish* load, char dishName[], int dishPrice, int quantity) {
