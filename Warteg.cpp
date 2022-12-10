@@ -182,7 +182,6 @@ void updateTable(char* customerName, char* dish, int quant) {
             strcpy(customerHead[index]->food[i], dish);
             strcat(customerHead[index]->food[i], quantStr);
             customerHead[index]->totalPrice += totalPrice(dish, quant); //to be removed
-            puts("after this go back to the order menu");
         }
         else {
             customer* curr = customerHead[index];
@@ -193,9 +192,9 @@ void updateTable(char* customerName, char* dish, int quant) {
                 }
                 char quantStr[4] = {0};
                 sprintf(quantStr, " x%d", quant);
-                strcat(dish, quantStr);
                 curr->food[i] = (char *) malloc(100);
                 strcpy(curr->food[i], dish);
+                strcat(curr->food[i], quantStr);
                 curr->totalPrice += totalPrice(dish, quant);
             }
         }
@@ -298,6 +297,9 @@ void menu() {
     }
     else if (selector == 7) {
         payment();
+    }
+    else {
+        exit(0);
     }
 }
 
@@ -438,11 +440,11 @@ void order() {
             char garbage;
             sscanf(quant, "%c%d", &garbage, &quantity);
             updateTable(customerName, dishName, quantity);
-            puts("Order Success!");
-            printf("Press enter to continue");
-            getchar();
-            menu();
         }
+        puts("Order Success!");
+        printf("Press enter to continue");
+        getchar();
+        menu();
     }
     else {
         printf("%s is not present\n", customerName);
@@ -460,9 +462,16 @@ void payment() {
         scanf("%s", indexStr);
     } while (checkIndex(indexStr) == 0);
     int index;
-    sscanf(indexStr, "%d", &index);
-    printPayment(index);
-
+    sscanf(indexStr, "%d", &index); getchar();
+    if (customerHead[index]) {
+        printPayment(index);
+    }
+    else {
+        puts("There is no such index");
+    }
+    printf("Press enter to continue");
+    getchar();
+    menu();
 }
 
 int checkIndex(char *str) {
