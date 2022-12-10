@@ -26,7 +26,6 @@ dish* createDish(dish* toBeAdded) {
 
 void pushHead(dish* toBeAdded) {
     dish* newDish = createDish(toBeAdded);
-    printf("%s\n", newDish->dishName);
     if (dishHead == NULL) {
         dishHead = dishTail = newDish;
     }
@@ -221,9 +220,7 @@ int totalPrice(char* dishName, int quantity) {
     while (curr && strcmp(curr->dishName, dishName) != 0) {
         curr = curr->next;
     }
-    puts("after this will return value");
     int price = curr->dishPrice * quantity;
-    printf("%d\n", price);
     return price;
 }
 
@@ -448,6 +445,7 @@ void searchCustomer() {
 }
 
 void viewWarteg() {
+    system("cls");
     printHashTable();
     printf("\nPress enter to continue");
     getch();
@@ -525,7 +523,6 @@ int checkIndex(char *str) {
 
 int checkQuant(char *str) {
     if (*str == 'x' && *(str+1) >= '1' && *(str+1) <='9') {
-        puts("format accurate"); //to be removed
         return 1;
     }
     return 0;
