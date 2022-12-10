@@ -130,6 +130,7 @@ struct customer {
     int totalPrice;
 } *customerHead[9999] = {NULL}, *customerTail[9999] = {NULL};
 
+
 customer* createCustomer(char customerName[]) {
     customer* newCustomer = (customer *) malloc(sizeof(customer));
     strcpy(newCustomer->customerName, customerName);
@@ -202,6 +203,19 @@ void updateTable(char* customerName, char* dish, int quant) {
     }
 }
 
+void removeTable(int index) {
+    customer* temp = customerHead[index];
+    if (temp->next) {
+        customerHead[index] = temp->next;
+        temp->next = NULL;
+        free(temp);
+    }
+    else {
+        free(temp);
+        customerHead[index] = customerTail[index] = NULL;
+    }
+}
+
 int totalPrice(char* dishName, int quantity) {
     dish* curr = dishHead;
     while (curr && strcmp(curr->dishName, dishName) != 0) {
@@ -250,6 +264,7 @@ void order();
 int checkQuant(char *str);
 void payment();
 int checkIndex(char *str);
+void systemSetter();
 
 int main() {
     menu();
@@ -262,7 +277,7 @@ void menu() {
     time_t t;
     t = time(NULL);
     ptr = localtime(&t);
-    printf("System: \n");
+    printf("System: "); systemSetter();
     printf("%s\n", asctime(ptr));
     printf("1. Add Dish\n");
     puts("2. Remove Dish");
@@ -301,6 +316,24 @@ void menu() {
     else {
         exit(0);
     }
+}
+
+void systemSetter() {
+    char os[30];
+    #ifdef __APPLE__
+	    // apple specific code
+        strcpy(os, "Mac OSX");
+	#elif _WIN32
+	    // windows specific code
+        strcpy(os, "Windows");
+	#elif __LINUX__
+	    // linux specific code
+        strcpy(os, "Linux");
+	#else
+	    // general code or warning
+        strcpy(os, "Others");
+	#endif
+    printf("%s\n", os);
 }
 
 void addDish() {
@@ -352,6 +385,9 @@ void printDishTable() {
         printf("%-3d%-20s%-10dRp%d\n", counter, curr->dishName, curr->quantity, curr->dishPrice);
         counter++;
         curr = curr->next;
+    }
+    if (counter == 1) {
+        puts("\nThere isn't any food left");
     }
     printf("\n");
 }
@@ -442,14 +478,13 @@ void order() {
             updateTable(customerName, dishName, quantity);
         }
         puts("Order Success!");
-        printf("Press enter to continue");
-        getchar();
-        menu();
     }
     else {
         printf("%s is not present\n", customerName);
     }
-    
+    printf("Press enter to continue");
+    getchar();
+    menu();
 }
 
 void payment() {
@@ -465,6 +500,7 @@ void payment() {
     sscanf(indexStr, "%d", &index); getchar();
     if (customerHead[index]) {
         printPayment(index);
+        removeTable(index);
     }
     else {
         puts("There is no such index");
