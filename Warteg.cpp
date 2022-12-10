@@ -125,7 +125,7 @@ unsigned long
 
 struct customer {
     char customerName[100];
-    char* food[100] = {0};
+    char *food[100] = {0};
     customer* next;
     int totalPrice;
 } *customerHead[9999] = {NULL}, *customerTail[9999] = {NULL};
@@ -166,6 +166,53 @@ int lookupName(char *name) {
     }
     return 0;
 }
+int totalPrice(char* dishName, int quantity);
+
+void updateTable(char* customerName, char* dish, int quant) {
+    int index = hash(customerName);
+    if (customerHead[index]) {
+        if (strcmp(customerHead[index]->customerName, customerName) == 0) {
+            int i = 0;
+            while (customerHead[index]->food[i] != 0) {
+                i++;
+            }
+            char quantStr[4] = {0};
+            sprintf(quantStr, " x%d", quant);
+            customerHead[index]->food[i] = (char *) malloc(100);
+            strcpy(customerHead[index]->food[i], dish);
+            strcat(customerHead[index]->food[i], quantStr);
+            customerHead[index]->totalPrice += totalPrice(dish, quant); //to be removed
+            puts("after this go back to the order menu");
+        }
+        else {
+            customer* curr = customerHead[index];
+            while (curr && strcmp(curr->customerName, customerName)) {
+                int i = 0;
+                while (curr->food[i] != 0) {
+                    i++;
+                }
+                char quantStr[4] = {0};
+                sprintf(quantStr, " x%d", quant);
+                strcat(dish, quantStr);
+                curr->food[i] = (char *) malloc(100);
+                strcpy(curr->food[i], dish);
+                curr->totalPrice += totalPrice(dish, quant);
+            }
+        }
+
+    }
+}
+
+int totalPrice(char* dishName, int quantity) {
+    dish* curr = dishHead;
+    while (curr && strcmp(curr->dishName, dishName) != 0) {
+        curr = curr->next;
+    }
+    puts("after this will return value");
+    int price = curr->dishPrice * quantity;
+    printf("%d\n", price);
+    return price;
+}
 
 void printHashTable() {
     puts("Customer's List");
@@ -176,6 +223,16 @@ void printHashTable() {
             }
         }
     }
+}
+
+void printPayment(int index) {
+    printf("\n");
+    customer* temp = customerHead[index];
+    printf("%s\n", temp->customerName);
+    for (int i = 0;temp->food[i]!= 0;i++) {
+        printf("[%d] %s\n", i+1, temp->food[i]);
+    }
+    printf("Total Price: %d\n", temp->totalPrice);
 }
 
 
@@ -191,6 +248,9 @@ void addCustomer();
 void searchCustomer();
 void viewWarteg();
 void order();
+int checkQuant(char *str);
+void payment();
+int checkIndex(char *str);
 
 int main() {
     menu();
@@ -232,6 +292,12 @@ void menu() {
     }
     else if (selector == 5) {
         viewWarteg();
+    }
+    else if (selector == 6) {
+        order();
+    }
+    else if (selector == 7) {
+        payment();
     }
 }
 
@@ -356,12 +422,68 @@ void order() {
     printf("Insert the customer's name: ");
     scanf("%[^\n]", customerName); getchar();
     if (lookupName(customerName) == 1) {
-
+        int menuSize;
+        printf("Insert the amount of dish: ");
+        scanf("%d", &menuSize);
+        for (int i = 0;i<menuSize;i++) {
+            char dishName[100];
+            char quant[5];
+            //continue here
+            do
+            {
+                printf("[%d] Insert the dish's name and quantity: ", i+1);
+                scanf("%s %s", dishName, quant); getchar();
+            } while (checkDish(dishName) == 0 || checkQuant(quant) == 0);
+            int quantity;
+            char garbage;
+            sscanf(quant, "%c%d", &garbage, &quantity);
+            updateTable(customerName, dishName, quantity);
+            puts("Order Success!");
+            printf("Press enter to continue");
+            getchar();
+            menu();
+        }
     }
     else {
         printf("%s is not present\n", customerName);
     }
     
+}
+
+void payment() {
+    system("cls");
+    char indexStr[5];
+    do
+    {
+        /* code */
+        printf("Insert the customer's index: ");
+        scanf("%s", indexStr);
+    } while (checkIndex(indexStr) == 0);
+    int index;
+    sscanf(indexStr, "%d", &index);
+    printPayment(index);
+
+}
+
+int checkIndex(char *str) {
+    int length = strlen(str);
+    for (int i = 0;i<length;i++) {
+        if (*(str+i) >= '0' && *(str+i) <= '9') {
+            continue;
+        }
+        else {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int checkQuant(char *str) {
+    if (*str == 'x' && *(str+1) >= '1' && *(str+1) <='9') {
+        puts("format accurate"); //to be removed
+        return 1;
+    }
+    return 0;
 }
 
 int checkName(char customerName[]) {
@@ -384,7 +506,6 @@ int checkDish(char dishName[]) {
     dish* curr = dishHead;
     while (curr) {
         if (strcmp(curr->dishName, dishName) == 0) {
-            puts("check");
             return 1;
         }
         curr = curr->next;
